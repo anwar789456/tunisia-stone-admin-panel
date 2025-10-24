@@ -47,6 +47,7 @@ export default function UserStockManager({ userId, initialStock = [] }: UserStoc
   // Fetch stock on component mount
   useEffect(() => {
     fetchStock()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId])
 
   // Create new stock item
@@ -95,8 +96,8 @@ export default function UserStockManager({ userId, initialStock = [] }: UserStoc
       router.refresh()
       
       setTimeout(() => setSuccess(''), 3000)
-    } catch (err: any) {
-      setError(err.message || 'Failed to create stock item')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to create stock item')
     } finally {
       setLoading(false)
     }
@@ -145,8 +146,8 @@ export default function UserStockManager({ userId, initialStock = [] }: UserStoc
       router.refresh()
       
       setTimeout(() => setSuccess(''), 3000)
-    } catch (err: any) {
-      setError(err.message || 'Failed to update stock item')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update stock item')
     } finally {
       setLoading(false)
     }
@@ -178,8 +179,8 @@ export default function UserStockManager({ userId, initialStock = [] }: UserStoc
       router.refresh()
       
       setTimeout(() => setSuccess(''), 3000)
-    } catch (err: any) {
-      setError(err.message || 'Failed to delete stock item')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete stock item')
     } finally {
       setLoading(false)
     }

@@ -6,7 +6,7 @@ export async function middleware(request: NextRequest) {
     request,
   })
 
-  const supabase = createServerClient(
+  createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
@@ -27,18 +27,8 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // TESTING: Completely disable all auth checks - allow anyone to access
-  // const { data: { user } } = await supabase.auth.getUser()
-
-  // if (request.nextUrl.pathname.startsWith('/admin')) {
-  //   if (!user && request.nextUrl.pathname !== '/admin/login') {
-  //     return NextResponse.redirect(new URL('/admin/login', request.url))
-  //   }
-
-  //   if (user && request.nextUrl.pathname === '/admin/login') {
-  //     return NextResponse.redirect(new URL('/admin/dashboard', request.url))
-  //   }
-  // }
+  // Auth checks are handled in the layout component
+  // Middleware only manages cookie handling for Supabase
 
   return supabaseResponse
 }

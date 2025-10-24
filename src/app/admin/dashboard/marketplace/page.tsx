@@ -8,10 +8,28 @@ import { ShoppingBag, User, MapPin, DollarSign, Calendar, Plus, LayoutGrid, Tabl
 
 type ViewMode = 'table' | 'grid'
 
+interface MarketplacePost {
+  id: string
+  title: string
+  description?: string
+  price?: number
+  location?: string
+  category?: string
+  status: string
+  created_at: string
+  user_id: string
+  user?: {
+    id: string
+    email: string
+    nom: string
+    prenom: string
+  }
+}
+
 export default function MarketplacePage() {
   const searchParams = useSearchParams()
   const router = useRouter()
-  const [posts, setPosts] = useState<any[]>([])
+  const [posts, setPosts] = useState<MarketplacePost[]>([])
   const [counts, setCounts] = useState({ all: 0, active: 0, inactive: 0 })
   const [loading, setLoading] = useState(true)
   const [viewMode, setViewMode] = useState<ViewMode>('table')
@@ -21,6 +39,7 @@ export default function MarketplacePage() {
 
   useEffect(() => {
     fetchPosts()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, search])
 
   async function fetchPosts() {
@@ -200,7 +219,7 @@ export default function MarketplacePage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-slate-200">
-                {posts.map((post: any) => (
+                {posts.map((post) => (
                   <tr key={post.id} className="hover:bg-slate-50">
                     <td className="px-6 py-4">
                       <div className="flex items-center">
@@ -268,7 +287,7 @@ export default function MarketplacePage() {
               <h3 className="mt-2 text-sm font-medium text-slate-900">Aucune annonce trouvée</h3>
               <p className="mt-1 text-xs sm:text-sm text-slate-500">
                 {search
-                  ? 'Essayez d\'ajuster votre recherche'
+                  ? 'Essayez d&apos;ajuster votre recherche'
                   : 'Aucune annonce dans le système'}
               </p>
             </div>
@@ -279,7 +298,7 @@ export default function MarketplacePage() {
           {/* Grid View */}
           {posts.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              {posts.map((post: any) => (
+              {posts.map((post) => (
                 <Link
                   key={post.id}
                   href={`/admin/dashboard/marketplace/${post.id}`}
@@ -366,7 +385,7 @@ export default function MarketplacePage() {
               <h3 className="mt-2 text-sm font-medium text-slate-900">Aucune annonce trouvée</h3>
               <p className="mt-1 text-sm text-slate-500">
                 {search
-                  ? 'Essayez d\'ajuster votre recherche'
+                  ? 'Essayez d&apos;ajuster votre recherche'
                   : 'Aucune annonce dans le système'}
               </p>
             </div>

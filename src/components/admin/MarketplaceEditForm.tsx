@@ -61,8 +61,8 @@ export default function MarketplaceEditForm({ post }: { post: MarketplacePost })
 
       setSuccess(true)
       router.refresh()
-    } catch (err: any) {
-      setError(err.message || 'Échec de la mise à jour de l\'annonce')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Échec de la mise à jour de l&apos;annonce')
     } finally {
       setLoading(false)
     }

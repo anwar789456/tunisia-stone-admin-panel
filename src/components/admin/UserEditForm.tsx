@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
 import type { Profile } from '@/lib/types'
 import { Save, Loader2 } from 'lucide-react'
 
@@ -59,9 +58,9 @@ export default function UserEditForm({ user }: { user: Profile }) {
       }, 500)
       
       setTimeout(() => setSuccess(false), 3000)
-    } catch (err: any) {
+    } catch (err) {
       console.error('Update error:', err)
-      setError(err.message || 'Failed to update user')
+      setError(err instanceof Error ? err.message : 'Failed to update user')
     } finally {
       setLoading(false)
     }
@@ -118,7 +117,7 @@ export default function UserEditForm({ user }: { user: Profile }) {
             disabled
             className="w-full px-3 sm:px-4 py-2.5 sm:py-2 border border-slate-300 rounded-lg bg-slate-50 text-slate-500 cursor-not-allowed text-sm sm:text-base min-h-[44px]"
           />
-          <p className="text-xs text-slate-500 mt-1">L'email ne peut pas être modifié</p>
+          <p className="text-xs text-slate-500 mt-1">L&apos;email ne peut pas être modifié</p>
         </div>
 
         <div>
