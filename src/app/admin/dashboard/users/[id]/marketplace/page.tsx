@@ -1,86 +1,159 @@
-import { createClient } from '@/lib/supabase/server'
-import { notFound } from 'next/navigation'
+'use client'
+
+import { useEffect, useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
+import { useParams, useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, ShoppingBag, MapPin, DollarSign, Calendar, Edit, User } from 'lucide-react'
+import { ArrowLeft, ShoppingBag, MapPin, DollarSign, Calendar, Edit, User, Plus, Trash2 } from 'lucide-react'
+import MarketplaceModal from '@/components/admin/MarketplaceModal'
+import UserMarketplaceForm from '@/components/admin/UserMarketplaceForm'
 
-// Force dynamic rendering
-export const dynamic = 'force-dynamic'
-export const revalidate = 0
+interface MarketplacePost {
+  id: string
+  user_id: string
+  title: string
+  description: string | null
+  price: number | null
+  location: string | null
+  images: string[] | null
+  category: string | null
+  status: string
+  contact_info: string | null
+  created_at: string
+}
 
-export default async function UserMarketplacePage({
-  params,
-  searchParams,
-}: {
-  params: Promise<{ id: string }>
-  searchParams: Promise<{ status?: string }>
-}) {
-  const { id } = await params
-  const { status = 'all' } = await searchParams
-  const supabase = await createClient()
+interface UserProfile {
+  nom: string
+  prenom: string
+  email: string
+}
 
-  // Fetch user
-  const { data: user, error: userError } = await supabase
-    .from('profiles')
-    .select('nom, prenom, email')
-    .eq('id', id)
-    .single()
+export default function UserMarketplacePage() {
+  const params = useParams()
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const id = params.id as string
+  const status = searchParams.get('status') || 'all'
 
-  if (userError || !user) {
-    notFound()
+  const [user, setUser] = useState<UserProfile | null>(null)
+  const [posts, setPosts] = useState<MarketplacePost[]>([])
+  const [counts, setCounts] = useState({ all: 0, active: 0, inactive: 0 })
+  const [loading, setLoading] = useState(true)
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const [editingPost, setEditingPost] = useState<MarketplacePost | null>(null)
+  const [deletingPostId, setDeletingPostId] = useState<string | null>(null)
+
+  useEffect(() => {
+    fetchData()
+  }, [id, status])
+
+  const fetchData = async () => {
+    setLoading(true)
+    const supabase = createClient()
+
+    // Fetch user
+    const { data: userData, error: userError } = await supabase
+      .from('profiles')
+      .select('nom, prenom, email')
+      .eq('id', id)
+      .single()
+
+    if (userError || !userData) {
+      router.push('/admin/dashboard/users')
+      return
+    }
+
+    setUser(userData)
+
+    // Fetch user's marketplace posts
+    let query = supabase
+      .from('marketplace_posts')
+      .select('*')
+      .eq('user_id', id)
+      .order('created_at', { ascending: false })
+
+    if (status && status !== 'all') {
+      query = query.eq('status', status)
+    }
+
+    const { data: postsData, error: postsError } = await query
+
+    if (postsError) {
+      console.error('Error fetching posts:', postsError)
+    }
+
+    setPosts(postsData || [])
+
+    // Get status counts
+    const { data: allPosts } = await supabase
+      .from('marketplace_posts')
+      .select('status')
+      .eq('user_id', id)
+
+    setCounts({
+      all: allPosts?.length || 0,
+      active: allPosts?.filter(p => p.status === 'active').length || 0,
+      inactive: allPosts?.filter(p => p.status === 'inactive').length || 0,
+    })
+
+    setLoading(false)
   }
 
-  // Fetch user's marketplace posts with status filter
-  let query = supabase
-    .from('marketplace_posts')
-    .select('*')
-    .eq('user_id', id)
-    .order('created_at', { ascending: false })
+  const handleDelete = async (postId: string) => {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cette annonce ?')) return
 
-  const { data: allPostsForFilter, error: postsError } = await query
+    setDeletingPostId(postId)
+    const supabase = createClient()
 
-  if (postsError) {
-    console.error('Error fetching posts:', postsError)
+    try {
+      // Get post to delete images
+      const { data: post } = await supabase
+        .from('marketplace_posts')
+        .select('images')
+        .eq('id', postId)
+        .single()
+
+      // Delete images from storage
+      if (post?.images && post.images.length > 0) {
+        await supabase.storage
+          .from('marketplace_images')
+          .remove(post.images)
+      }
+
+      // Delete post
+      const { error } = await supabase
+        .from('marketplace_posts')
+        .delete()
+        .eq('id', postId)
+
+      if (error) throw error
+
+      fetchData()
+    } catch (err) {
+      console.error('Error deleting post:', err)
+      alert('Échec de la suppression de l\'annonce')
+    } finally {
+      setDeletingPostId(null)
+    }
   }
 
-  // Filter posts client-side to handle any potential whitespace issues
-  let posts = allPostsForFilter || []
-  if (status && status !== 'all') {
-    posts = posts.filter(p => p.status?.trim() === status)
+  const handleModalClose = () => {
+    setIsCreateModalOpen(false)
+    setEditingPost(null)
   }
 
-  // Get status counts
-  const { data: allPosts, error: countError } = await supabase
-    .from('marketplace_posts')
-    .select('status')
-    .eq('user_id', id)
-
-  if (countError) {
-    console.error('Error fetching counts:', countError)
+  const handleSuccess = () => {
+    handleModalClose()
+    fetchData()
   }
 
-  // Debug: Check ALL posts in database to see if user_id is the issue
-  const { data: allPostsInDb } = await supabase
-    .from('marketplace_posts')
-    .select('id, title, status, user_id')
-
-  // Check for whitespace or case issues
-  const statusDebug = allPosts?.map(p => ({
-    status: p.status,
-    isActive: p.status === 'active',
-    isInactive: p.status === 'inactive',
-    trimmedStatus: p.status?.trim(),
-    statusLength: p.status?.length
-  }))
-  console.log('Status debug:', statusDebug)
-
-  const counts = {
-    all: allPosts?.length || 0,
-    active: allPosts?.filter(p => p.status?.trim() === 'active').length || 0,
-    inactive: allPosts?.filter(p => p.status?.trim() === 'inactive').length || 0,
+  if (loading || !user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    )
   }
-
-  console.log('Counts:', counts)
-  console.log('=== END DEBUG ===')
 
   return (
     <div>
@@ -92,16 +165,25 @@ export default async function UserMarketplacePage({
         Retour au Profil
       </Link>
 
-      <div className="mb-6">
-        <div className="flex items-center gap-3 mb-2">
-          <User className="w-6 h-6 text-slate-600" />
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">
-            Annonces de {user.nom} {user.prenom}
-          </h1>
+      <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <div className="flex items-center gap-3 mb-2">
+            <User className="w-6 h-6 text-slate-600" />
+            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">
+              Annonces de {user.nom} {user.prenom}
+            </h1>
+          </div>
+          <p className="text-slate-600">
+            {posts?.length || 0} annonce{(posts?.length || 0) !== 1 ? 's' : ''} marketplace
+          </p>
         </div>
-        <p className="text-slate-600">
-          {posts?.length || 0} annonce{(posts?.length || 0) !== 1 ? 's' : ''} marketplace
-        </p>
+        <button
+          onClick={() => setIsCreateModalOpen(true)}
+          className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-medium rounded-lg transition min-h-[44px] touch-manipulation"
+        >
+          <Plus className="w-5 h-5 mr-2" />
+          Nouvelle Annonce
+        </button>
       </div>
 
       {/* Status Filter Tabs */}
@@ -184,13 +266,23 @@ export default async function UserMarketplacePage({
                     </div>
                   </div>
 
-                  <Link
-                    href={`/admin/dashboard/marketplace/${post.id}`}
-                    className="w-full sm:w-auto flex-shrink-0 inline-flex items-center justify-center px-4 py-2.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-sm font-medium rounded-lg transition min-h-[44px] touch-manipulation"
-                  >
-                    <Edit className="w-4 h-4 mr-2" />
-                    Modifier
-                  </Link>
+                  <div className="flex gap-2 w-full sm:w-auto">
+                    <button
+                      onClick={() => setEditingPost(post)}
+                      className="flex-1 sm:flex-initial inline-flex items-center justify-center px-4 py-2.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-sm font-medium rounded-lg transition min-h-[44px] touch-manipulation"
+                    >
+                      <Edit className="w-4 h-4 mr-2" />
+                      Modifier
+                    </button>
+                    <button
+                      onClick={() => handleDelete(post.id)}
+                      disabled={deletingPostId === post.id}
+                      className="flex-1 sm:flex-initial inline-flex items-center justify-center px-4 py-2.5 bg-red-600 hover:bg-red-700 active:bg-red-800 text-white text-sm font-medium rounded-lg transition min-h-[44px] touch-manipulation disabled:opacity-50"
+                    >
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      Supprimer
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -207,6 +299,35 @@ export default async function UserMarketplacePage({
           </div>
         )}
       </div>
+
+      {/* Create Modal */}
+      <MarketplaceModal
+        isOpen={isCreateModalOpen}
+        onClose={handleModalClose}
+        title="Nouvelle Annonce"
+      >
+        <UserMarketplaceForm
+          userId={id}
+          onSuccess={handleSuccess}
+          onCancel={handleModalClose}
+        />
+      </MarketplaceModal>
+
+      {/* Edit Modal */}
+      <MarketplaceModal
+        isOpen={!!editingPost}
+        onClose={handleModalClose}
+        title="Modifier l'Annonce"
+      >
+        {editingPost && (
+          <UserMarketplaceForm
+            userId={id}
+            post={editingPost}
+            onSuccess={handleSuccess}
+            onCancel={handleModalClose}
+          />
+        )}
+      </MarketplaceModal>
     </div>
   )
 }
