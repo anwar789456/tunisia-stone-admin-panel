@@ -7,28 +7,18 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode
 }) {
-  // TESTING: Skip profile check - allow anyone to access
+  // Check if user is an admin
   const profile = await getAdminProfile()
 
-  // Create a dummy profile if none exists
-  const displayProfile = profile || {
-    id: 'guest',
-    email: 'guest@admin.com',
-    nom: 'Guest',
-    prenom: 'Admin',
-    telephone: null,
-    societe: null,
-    category: null,
-    slug: null,
-    avatar_url: null,
-    is_pro: false,
-    is_admin: true
+  // Redirect to login if not an admin
+  if (!profile) {
+    redirect('/admin/login')
   }
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <AdminNav profile={displayProfile} />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <AdminNav profile={profile} />
+      <main className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
         {children}
       </main>
     </div>

@@ -31,11 +31,11 @@ export interface StockMarbre {
   id: string
   user_id: string
   product_name: string
-  type_marbre: string | null
-  quantity: number | null
-  longueur: number | null
-  largeur: number | null
-  epaisseur: number | null
+  type_marbre: string
+  quantity: number
+  longueur: number
+  largeur: number
+  epaisseur: number
   images: string[] | null
   created_at: string
   updated_at: string

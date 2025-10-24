@@ -34,17 +34,17 @@ export default async function MarketplaceEditPage({
     <div>
       <Link
         href="/admin/dashboard/marketplace"
-        className="inline-flex items-center text-sm text-slate-600 hover:text-slate-900 mb-6"
+        className="inline-flex items-center text-sm text-slate-600 hover:text-slate-900 mb-4 sm:mb-6 min-h-[44px] touch-manipulation"
       >
         <ArrowLeft className="w-4 h-4 mr-2" />
         Retour aux Annonces
       </Link>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* User Info */}
         <div className="lg:col-span-1">
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-            <h3 className="text-lg font-semibold text-slate-900 mb-4">Propriétaire</h3>
+          <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-slate-200 p-4 sm:p-6">
+            <h3 className="text-base sm:text-lg font-semibold text-slate-900 mb-3 sm:mb-4">Propriétaire</h3>
             
             <div className="space-y-3">
               <div className="flex items-center">
@@ -75,7 +75,7 @@ export default async function MarketplaceEditPage({
             <div className="mt-4">
               <Link
                 href={`/admin/dashboard/users/${post.user_id}`}
-                className="block w-full text-center px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition text-sm font-medium"
+                className="block w-full text-center px-4 py-2.5 sm:py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 active:bg-blue-200 transition text-sm font-medium min-h-[44px] touch-manipulation flex items-center justify-center"
               >
                 Voir le Profil
               </Link>
@@ -83,9 +83,9 @@ export default async function MarketplaceEditPage({
           </div>
 
           {/* Delete Section */}
-          <div className="bg-white rounded-xl shadow-sm border border-red-200 p-6 mt-6">
-            <h3 className="text-lg font-semibold text-red-900 mb-2">Zone de Danger</h3>
-            <p className="text-sm text-slate-600 mb-4">
+          <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-red-200 p-4 sm:p-6 mt-4 sm:mt-6">
+            <h3 className="text-base sm:text-lg font-semibold text-red-900 mb-2">Zone de Danger</h3>
+            <p className="text-xs sm:text-sm text-slate-600 mb-4">
               La suppression de cette annonce est irréversible.
             </p>
             <DeletePostButton postId={post.id} />
@@ -94,8 +94,8 @@ export default async function MarketplaceEditPage({
 
         {/* Edit Form */}
         <div className="lg:col-span-2">
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-            <h3 className="text-xl font-bold text-slate-900 mb-6">Modifier l'Annonce</h3>
+          <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-slate-200 p-4 sm:p-6">
+            <h3 className="text-lg sm:text-xl font-bold text-slate-900 mb-4 sm:mb-6">Modifier l'Annonce</h3>
             <MarketplaceEditForm post={post} />
           </div>
         </div>

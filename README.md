@@ -125,14 +125,35 @@ The admin panel works with these tables:
 - `stock_marbre` - Marble stock inventory
 - `postdemands` - Post demand requests
 
-## Deploy to Vercel
+## 🔐 Security & Deployment
+
+### Before Deploying
+
+**Run the security check:**
+```bash
+npm run security-check
+```
+
+This verifies:
+- ✅ No hardcoded secrets in code
+- ✅ Environment variables properly configured
+- ✅ `.gitignore` is set up correctly
+
+### Deploy to Vercel
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone)
 
-1. Push your code to GitHub
-2. Import the repository in Vercel
-3. Add environment variables in Vercel dashboard
-4. Deploy!
+**Quick Setup (5 minutes):**
+1. Run `npm run security-check` to verify security
+2. Push your code to GitHub (create a **private** repository)
+3. Import the repository in Vercel
+4. Add environment variables in Vercel dashboard
+5. Deploy!
+
+**📚 Detailed Guides:**
+- **Quick Start**: See `VERCEL_SETUP.md` for 5-minute deployment
+- **Complete Guide**: See `DEPLOYMENT_GUIDE.md` for detailed instructions
+- **Security Checklist**: See `SECURITY_CHECKLIST.md` before deploying
 
 **Important**: Make sure to add all environment variables from `.env.local` to your Vercel project settings.
 

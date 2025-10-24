@@ -32,19 +32,19 @@ export default function AdminLogin() {
       }
 
       if (data.user) {
-        // TESTING: Allow any user to login (remove admin check temporarily)
-        // const { data: profile } = await supabase
-        //   .from('profiles')
-        //   .select('is_admin')
-        //   .eq('id', data.user.id)
-        //   .single()
+        // Check if user has admin privileges
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('is_admin')
+          .eq('id', data.user.id)
+          .single()
 
-        // if (!profile?.is_admin) {
-        //   await supabase.auth.signOut()
-        //   setError('Access denied. Admin privileges required.')
-        //   setLoading(false)
-        //   return
-        // }
+        if (!profile?.is_admin) {
+          await supabase.auth.signOut()
+          setError('Accès refusé. Privilèges administrateur requis.')
+          setLoading(false)
+          return
+        }
 
         router.push('/admin/dashboard')
         router.refresh()

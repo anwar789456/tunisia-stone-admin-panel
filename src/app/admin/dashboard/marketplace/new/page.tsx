@@ -7,15 +7,15 @@ export default function NewMarketplacePage() {
     <div>
       <Link
         href="/admin/dashboard/marketplace"
-        className="inline-flex items-center text-sm text-slate-600 hover:text-slate-900 mb-6"
+        className="inline-flex items-center text-sm text-slate-600 hover:text-slate-900 mb-4 sm:mb-6 min-h-[44px] touch-manipulation"
       >
         <ArrowLeft className="w-4 h-4 mr-2" />
         Retour aux Annonces
       </Link>
 
       <div className="max-w-3xl">
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-          <h1 className="text-2xl font-bold text-slate-900 mb-6">Créer une Nouvelle Annonce</h1>
+        <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-slate-200 p-4 sm:p-6">
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 mb-4 sm:mb-6">Créer une Nouvelle Annonce</h1>
           <MarketplaceCreateForm />
         </div>
       </div>

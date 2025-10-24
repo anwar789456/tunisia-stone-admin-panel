@@ -31,7 +31,7 @@ export async function getAdminProfile() {
     .eq('id', user.id)
     .single()
 
-  // TESTING: Return profile regardless of admin status
-  // if (profile?.is_admin !== true) return null
+  // Only return profile if user is an admin
+  if (profile?.is_admin !== true) return null
   return profile
 }
