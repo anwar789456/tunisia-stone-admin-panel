@@ -4,9 +4,12 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useParams, useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, ShoppingBag, MapPin, DollarSign, Calendar, Edit, User, Plus, Trash2 } from 'lucide-react'
+import Image from 'next/image'
+import { ArrowLeft, ShoppingBag, MapPin, DollarSign, Calendar, Edit, User, Plus, Trash2, LayoutGrid, Table2 } from 'lucide-react'
 import MarketplaceModal from '@/components/admin/MarketplaceModal'
 import UserMarketplaceForm from '@/components/admin/UserMarketplaceForm'
+
+type ViewMode = 'table' | 'grid'
 
 interface MarketplacePost {
   id: string
@@ -42,6 +45,7 @@ export default function UserMarketplacePage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [editingPost, setEditingPost] = useState<MarketplacePost | null>(null)
   const [deletingPostId, setDeletingPostId] = useState<string | null>(null)
+  const [viewMode, setViewMode] = useState<ViewMode>('table')
 
   useEffect(() => {
     fetchData()
@@ -147,6 +151,14 @@ export default function UserMarketplacePage() {
     fetchData()
   }
 
+  const getImageUrl = (imagePath: string) => {
+    const supabase = createClient()
+    const { data } = supabase.storage
+      .from('marketplace_images')
+      .getPublicUrl(imagePath)
+    return data.publicUrl
+  }
+
   if (loading || !user) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -186,8 +198,9 @@ export default function UserMarketplacePage() {
         </button>
       </div>
 
-      {/* Status Filter Tabs */}
-      <div className="mb-4 sm:mb-6 flex gap-1 sm:gap-2 border-b border-slate-200 overflow-x-auto">
+      {/* Status Filter Tabs and Layout Toggle */}
+      <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        <div className="flex gap-1 sm:gap-2 border-b border-slate-200 overflow-x-auto w-full sm:w-auto">
         {[
           { label: 'Toutes', value: 'all', count: counts.all },
           { label: 'Actives', value: 'active', count: counts.active },
@@ -205,60 +218,239 @@ export default function UserMarketplacePage() {
             {tab.label} ({tab.count})
           </Link>
         ))}
+        </div>
+        
+        {/* Layout Toggle */}
+        <div className="flex gap-2 bg-slate-100 rounded-lg p-1">
+          <button
+            onClick={() => setViewMode('table')}
+            className={`flex items-center gap-2 px-3 py-2 rounded-md transition ${
+              viewMode === 'table'
+                ? 'bg-white text-blue-600 shadow-sm'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            <Table2 className="w-4 h-4" />
+            <span className="text-sm font-medium">Tableau</span>
+          </button>
+          <button
+            onClick={() => setViewMode('grid')}
+            className={`flex items-center gap-2 px-3 py-2 rounded-md transition ${
+              viewMode === 'grid'
+                ? 'bg-white text-blue-600 shadow-sm'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            <LayoutGrid className="w-4 h-4" />
+            <span className="text-sm font-medium">Grille</span>
+          </button>
+        </div>
       </div>
 
-      <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-slate-200">
-        {posts && posts.length > 0 ? (
-          <div className="divide-y divide-slate-200">
-            {posts.map((post) => (
-              <div key={post.id} className="p-4 sm:p-6 hover:bg-slate-50 transition">
-                <div className="flex flex-col sm:flex-row items-start gap-4">
-                  <div className="flex-1 min-w-0 w-full">
-                    <div className="flex items-start justify-between gap-3 mb-2">
-                      <h3 className="font-semibold text-slate-900 text-lg flex-1">
-                        {post.title}
-                      </h3>
+      {viewMode === 'table' ? (
+        <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-slate-200">
+          {posts && posts.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-slate-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                      Annonce
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                      Prix
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                      Localisation
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                      Statut
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                      Date
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-slate-200">
+                  {posts.map((post) => (
+                    <tr key={post.id} className="hover:bg-slate-50">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center">
+                          {post.images && post.images.length > 0 ? (
+                            <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 mr-3 bg-slate-100">
+                              <Image
+                                src={getImageUrl(post.images[0])}
+                                alt={post.title}
+                                fill
+                                className="object-cover"
+                                sizes="64px"
+                              />
+                            </div>
+                          ) : (
+                            <div className="w-16 h-16 rounded-lg bg-slate-100 flex items-center justify-center mr-3 flex-shrink-0">
+                              <ShoppingBag className="w-8 h-8 text-slate-400" />
+                            </div>
+                          )}
+                          <div>
+                            <div className="text-sm font-medium text-slate-900">{post.title}</div>
+                            <div className="text-sm text-slate-500 line-clamp-1">{post.description}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center text-sm text-slate-900">
+                          <DollarSign className="w-4 h-4 text-slate-400 mr-1" />
+                          {post.price ? `${post.price} TND` : '-'}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center text-sm text-slate-900">
+                          <MapPin className="w-4 h-4 text-slate-400 mr-1" />
+                          {post.location || '-'}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span
+                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                            post.status === 'active'
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-gray-100 text-gray-800'
+                          }`}
+                        >
+                          {post.status === 'active' ? 'Active' : 'Inactive'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center text-sm text-slate-500">
+                          <Calendar className="w-4 h-4 mr-1" />
+                          {new Date(post.created_at).toLocaleDateString('fr-FR')}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => setEditingPost(post)}
+                            className="text-blue-600 hover:text-blue-900"
+                          >
+                            Modifier
+                          </button>
+                          <button
+                            onClick={() => handleDelete(post.id)}
+                            disabled={deletingPostId === post.id}
+                            className="text-red-600 hover:text-red-900 disabled:opacity-50"
+                          >
+                            Supprimer
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <ShoppingBag className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+              <h3 className="text-lg font-medium text-slate-900 mb-1">
+                Aucune annonce marketplace
+              </h3>
+              <p className="text-slate-500">
+                Cet utilisateur n'a pas encore publié d'annonces
+              </p>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div>
+          {posts && posts.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+              {posts.map((post) => (
+                <div
+                  key={post.id}
+                  className="bg-white rounded-lg shadow-sm border border-slate-200 hover:shadow-md transition-shadow overflow-hidden"
+                >
+                  {/* Card Image */}
+                  {post.images && post.images.length > 0 ? (
+                    <div className="relative w-full h-48 bg-slate-100">
+                      <Image
+                        src={getImageUrl(post.images[0])}
+                        alt={post.title}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      />
                       <span
-                        className={`px-2 py-1 text-xs font-semibold rounded-full whitespace-nowrap flex-shrink-0 ${
+                        className={`absolute top-3 right-3 px-2 py-1 text-xs font-semibold rounded-full whitespace-nowrap backdrop-blur-sm ${
+                          post.status === 'active'
+                            ? 'bg-green-100/90 text-green-800'
+                            : 'bg-gray-100/90 text-gray-800'
+                        }`}
+                      >
+                        {post.status === 'active' ? 'Active' : 'Inactive'}
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="relative w-full h-48 bg-slate-100 flex items-center justify-center">
+                      <ShoppingBag className="w-16 h-16 text-slate-300" />
+                      <span
+                        className={`absolute top-3 right-3 px-2 py-1 text-xs font-semibold rounded-full whitespace-nowrap ${
                           post.status === 'active'
                             ? 'bg-green-100 text-green-800'
-                            : post.status === 'inactive'
-                            ? 'bg-blue-100 text-blue-800'
                             : 'bg-gray-100 text-gray-800'
                         }`}
                       >
-                        {post.status === 'active'
-                          ? 'Active'
-                          : 'Inactive'}
+                        {post.status === 'active' ? 'Active' : 'Inactive'}
                       </span>
                     </div>
+                  )}
+                  
+                  {/* Card Header */}
+                  <div className="p-4 sm:p-5">
+                    <div className="mb-3">
+                      <h3 className="text-base font-semibold text-slate-900 line-clamp-2">
+                        {post.title}
+                      </h3>
+                    </div>
 
+                    {/* Description */}
                     {post.description && (
-                      <p className="text-sm text-slate-600 mb-3 line-clamp-2">
+                      <p className="text-sm text-slate-600 line-clamp-2 mb-4">
                         {post.description}
                       </p>
                     )}
 
-                    <div className="flex flex-wrap items-center gap-3 text-sm">
-                      {post.price && (
-                        <div className="flex items-center gap-1 font-semibold text-blue-600">
-                          <DollarSign className="w-4 h-4" />
-                          <span>{post.price} TND</span>
+                    {/* Price */}
+                    {post.price && (
+                      <div className="mb-4 pb-4 border-b border-slate-100">
+                        <div className="flex items-center gap-2">
+                          <DollarSign className="w-5 h-5 text-blue-600" />
+                          <span className="text-xl font-bold text-blue-600">
+                            {post.price} TND
+                          </span>
                         </div>
-                      )}
+                      </div>
+                    )}
+
+                    {/* Details */}
+                    <div className="space-y-2 mb-4">
                       {post.location && (
-                        <div className="flex items-center gap-1 text-slate-600">
+                        <div className="flex items-center gap-2 text-sm text-slate-600">
                           <MapPin className="w-4 h-4 text-slate-400" />
                           <span>{post.location}</span>
                         </div>
                       )}
                       {post.category && (
-                        <span className="px-2 py-1 text-xs bg-slate-100 text-slate-700 rounded">
-                          {post.category}
-                        </span>
+                        <div className="flex items-center gap-2 text-sm text-slate-600">
+                          <span className="px-2 py-1 text-xs bg-slate-100 text-slate-700 rounded">
+                            {post.category}
+                          </span>
+                        </div>
                       )}
                       {post.created_at && (
-                        <div className="flex items-center gap-1 text-slate-500">
+                        <div className="flex items-center gap-2 text-sm text-slate-500">
                           <Calendar className="w-4 h-4 text-slate-400" />
                           <span>{new Date(post.created_at).toLocaleDateString('fr-FR')}</span>
                         </div>
@@ -266,39 +458,40 @@ export default function UserMarketplacePage() {
                     </div>
                   </div>
 
-                  <div className="flex gap-2 w-full sm:w-auto">
+                  {/* Card Footer */}
+                  <div className="px-4 sm:px-5 py-3 bg-slate-50 border-t border-slate-100 flex gap-2">
                     <button
                       onClick={() => setEditingPost(post)}
-                      className="flex-1 sm:flex-initial inline-flex items-center justify-center px-4 py-2.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-sm font-medium rounded-lg transition min-h-[44px] touch-manipulation"
+                      className="flex-1 inline-flex items-center justify-center px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition"
                     >
-                      <Edit className="w-4 h-4 mr-2" />
+                      <Edit className="w-4 h-4 mr-1" />
                       Modifier
                     </button>
                     <button
                       onClick={() => handleDelete(post.id)}
                       disabled={deletingPostId === post.id}
-                      className="flex-1 sm:flex-initial inline-flex items-center justify-center px-4 py-2.5 bg-red-600 hover:bg-red-700 active:bg-red-800 text-white text-sm font-medium rounded-lg transition min-h-[44px] touch-manipulation disabled:opacity-50"
+                      className="flex-1 inline-flex items-center justify-center px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition disabled:opacity-50"
                     >
-                      <Trash2 className="w-4 h-4 mr-2" />
+                      <Trash2 className="w-4 h-4 mr-1" />
                       Supprimer
                     </button>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12">
-            <ShoppingBag className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-            <h3 className="text-lg font-medium text-slate-900 mb-1">
-              Aucune annonce marketplace
-            </h3>
-            <p className="text-slate-500">
-              Cet utilisateur n'a pas encore publié d'annonces
-            </p>
-          </div>
-        )}
-      </div>
+              ))}
+            </div>
+          ) : (
+            <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-slate-200 text-center py-12">
+              <ShoppingBag className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+              <h3 className="text-lg font-medium text-slate-900 mb-1">
+                Aucune annonce marketplace
+              </h3>
+              <p className="text-slate-500">
+                Cet utilisateur n'a pas encore publié d'annonces
+              </p>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Create Modal */}
       <MarketplaceModal
