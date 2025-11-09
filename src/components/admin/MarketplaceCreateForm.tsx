@@ -6,6 +6,44 @@ import { createClient } from '@/lib/supabase/client'
 import { Save, Loader2 } from 'lucide-react'
 import UserSearchDropdown from './UserSearchDropdown'
 
+const TUNISIAN_GOVERNORATES = [
+  'Toute La Tunisie',
+  'Tunis',
+  'Ariana',
+  'Ben Arous',
+  'Manouba',
+  'Nabeul',
+  'Zaghouan',
+  'Bizerte',
+  'Béja',
+  'Jendouba',
+  'Le Kef',
+  'Siliana',
+  'Sousse',
+  'Monastir',
+  'Mahdia',
+  'Kairouan',
+  'Kasserine',
+  'Sidi Bouzid',
+  'Sfax',
+  'Gabès',
+  'Médenine',
+  'Tataouine',
+  'Gafsa',
+  'Tozeur',
+  'Kebili'
+]
+
+const CATEGORIES = [
+  'Marbre',
+  'Granit',
+  'Pierre naturelle',
+  'Céramique',
+  'Équipement',
+  'Services',
+  'Autre'
+]
+
 export default function MarketplaceCreateForm() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
@@ -20,7 +58,7 @@ export default function MarketplaceCreateForm() {
     location: '',
     category: '',
     status: 'active',
-    contact_info: '',
+    post_type: 'annonce',
   })
 
   // Fetch users for selection
@@ -61,7 +99,7 @@ export default function MarketplaceCreateForm() {
           location: formData.location || null,
           category: formData.category || null,
           status: formData.status,
-          contact_info: formData.contact_info || null,
+          post_type: formData.post_type,
         })
         .select()
         .single()
@@ -83,6 +121,36 @@ export default function MarketplaceCreateForm() {
           {error}
         </div>
       )}
+
+      <div>
+        <label className="block text-xs sm:text-sm font-medium text-slate-700 mb-3">
+          Type de Post <span className="text-red-500">*</span>
+        </label>
+        <div className="flex gap-6">
+          <label className="flex items-center cursor-pointer">
+            <input
+              type="radio"
+              name="post_type"
+              value="annonce"
+              checked={formData.post_type === 'annonce'}
+              onChange={(e) => setFormData({ ...formData, post_type: e.target.value })}
+              className="w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-500"
+            />
+            <span className="ml-2 text-sm text-slate-700">Annonce</span>
+          </label>
+          <label className="flex items-center cursor-pointer">
+            <input
+              type="radio"
+              name="post_type"
+              value="demande"
+              checked={formData.post_type === 'demande'}
+              onChange={(e) => setFormData({ ...formData, post_type: e.target.value })}
+              className="w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-500"
+            />
+            <span className="ml-2 text-sm text-slate-700">Demande</span>
+          </label>
+        </div>
+      </div>
 
       <div>
         <label className="block text-xs sm:text-sm font-medium text-slate-700 mb-2">
@@ -141,24 +209,32 @@ export default function MarketplaceCreateForm() {
           <label className="block text-xs sm:text-sm font-medium text-slate-700 mb-2">
             Localisation
           </label>
-          <input
-            type="text"
+          <select
             value={formData.location}
             onChange={(e) => setFormData({ ...formData, location: e.target.value })}
             className="w-full px-3 sm:px-4 py-2.5 sm:py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-slate-900 text-sm sm:text-base min-h-[44px]"
-          />
+          >
+            <option value="">Sélectionner un gouvernorat</option>
+            {TUNISIAN_GOVERNORATES.map(gov => (
+              <option key={gov} value={gov}>{gov}</option>
+            ))}
+          </select>
         </div>
 
         <div>
           <label className="block text-xs sm:text-sm font-medium text-slate-700 mb-2">
             Catégorie
           </label>
-          <input
-            type="text"
+          <select
             value={formData.category}
             onChange={(e) => setFormData({ ...formData, category: e.target.value })}
             className="w-full px-3 sm:px-4 py-2.5 sm:py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-slate-900 text-sm sm:text-base min-h-[44px]"
-          />
+          >
+            <option value="">Sélectionner une catégorie</option>
+            {CATEGORIES.map(cat => (
+              <option key={cat} value={cat}>{cat}</option>
+            ))}
+          </select>
         </div>
 
         <div>
@@ -172,21 +248,8 @@ export default function MarketplaceCreateForm() {
           >
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
-            <option value="sold">Vendue</option>
           </select>
         </div>
-      </div>
-
-      <div>
-        <label className="block text-xs sm:text-sm font-medium text-slate-700 mb-2">
-          Informations de Contact
-        </label>
-        <input
-          type="text"
-          value={formData.contact_info}
-          onChange={(e) => setFormData({ ...formData, contact_info: e.target.value })}
-          className="w-full px-3 sm:px-4 py-2.5 sm:py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-slate-900 text-sm sm:text-base min-h-[44px]"
-        />
       </div>
 
       <div className="flex flex-col sm:flex-row justify-end gap-3 pt-2">

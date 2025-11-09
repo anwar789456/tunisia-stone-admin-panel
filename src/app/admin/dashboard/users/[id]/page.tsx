@@ -51,15 +51,7 @@ export default async function UserDetailPage({
         <div className="lg:col-span-1">
           <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-slate-200 p-4 sm:p-6">
             <div className="text-center">
-              {user.avatar_url ? (
-                <img
-                  src={user.avatar_url}
-                  alt={`${user.nom} ${user.prenom}`}
-                  className="w-24 h-24 rounded-full mx-auto mb-4 object-cover"
-                />
-              ) : (
-                <UserCircle className="w-24 h-24 text-slate-400 mx-auto mb-4" />
-              )}
+              <UserCircle className="w-24 h-24 text-slate-400 mx-auto mb-4" />
               <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
                 {user.nom} {user.prenom}
               </h2>

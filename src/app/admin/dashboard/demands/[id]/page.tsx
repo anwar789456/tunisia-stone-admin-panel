@@ -24,7 +24,7 @@ export default async function DemandDetailPage({
   // Fetch related sender profile
   const { data: sender } = await supabase
     .from('profiles')
-    .select('id, email, nom, prenom, societe, telephone, avatar_url')
+    .select('id, email, nom, prenom, societe, telephone')
     .eq('id', demandData.sender_id)
     .single()
 
@@ -58,15 +58,7 @@ export default async function DemandDetailPage({
             <h3 className="text-lg font-semibold text-slate-900 mb-4">Informations de l'Expéditeur</h3>
             
             <div className="text-center mb-4">
-              {demand.sender?.avatar_url ? (
-                <img
-                  src={demand.sender.avatar_url}
-                  alt={`${demand.sender.nom} ${demand.sender.prenom}`}
-                  className="w-20 h-20 rounded-full mx-auto mb-3 object-cover"
-                />
-              ) : (
-                <User className="w-20 h-20 text-slate-400 mx-auto mb-3" />
-              )}
+              <User className="w-20 h-20 text-slate-400 mx-auto mb-3" />
               <h4 className="text-xl font-bold text-slate-900">
                 {demand.sender?.nom} {demand.sender?.prenom}
               </h4>

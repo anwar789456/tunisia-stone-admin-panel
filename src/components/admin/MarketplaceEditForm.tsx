@@ -15,7 +15,6 @@ interface MarketplacePost {
   images: string[] | null
   category: string | null
   status: string | null
-  contact_info: string | null
 }
 
 export default function MarketplaceEditForm({ post }: { post: MarketplacePost }) {
@@ -31,7 +30,6 @@ export default function MarketplaceEditForm({ post }: { post: MarketplacePost })
     location: post.location || '',
     category: post.category || '',
     status: post.status || 'active',
-    contact_info: post.contact_info || '',
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -52,7 +50,6 @@ export default function MarketplaceEditForm({ post }: { post: MarketplacePost })
           location: formData.location || null,
           category: formData.category || null,
           status: formData.status,
-          contact_info: formData.contact_info || null,
           updated_at: new Date().toISOString(),
         })
         .eq('id', post.id)
@@ -157,21 +154,8 @@ export default function MarketplaceEditForm({ post }: { post: MarketplacePost })
           >
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
-            <option value="sold">Vendue</option>
           </select>
         </div>
-      </div>
-
-      <div>
-        <label className="block text-xs sm:text-sm font-medium text-slate-700 mb-2">
-          Informations de Contact
-        </label>
-        <input
-          type="text"
-          value={formData.contact_info}
-          onChange={(e) => setFormData({ ...formData, contact_info: e.target.value })}
-          className="w-full px-3 sm:px-4 py-2.5 sm:py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-slate-900 text-sm sm:text-base min-h-[44px]"
-        />
       </div>
 
       <div className="flex justify-end pt-2">

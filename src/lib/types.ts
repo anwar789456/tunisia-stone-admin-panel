@@ -7,7 +7,6 @@ export interface Profile {
   societe: string | null
   category: string | null
   slug: string | null
-  avatar_url: string | null
   is_pro: boolean | null
   is_admin?: boolean | null
 }
@@ -22,7 +21,6 @@ export interface MarketplacePost {
   images: string[] | null
   category: string | null
   status: string | null
-  contact_info: string | null
   created_at: string
   updated_at: string
 }

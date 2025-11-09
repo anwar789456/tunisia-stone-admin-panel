@@ -69,15 +69,7 @@ export default async function UsersPage({
                 <tr key={user.id} className="hover:bg-slate-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
-                      {user.avatar_url ? (
-                        <img
-                          src={user.avatar_url}
-                          alt={`${user.nom} ${user.prenom}`}
-                          className="w-10 h-10 rounded-full object-cover"
-                        />
-                      ) : (
-                        <UserCircle className="w-10 h-10 text-slate-400" />
-                      )}
+                      <UserCircle className="w-10 h-10 text-slate-400" />
                       <div className="ml-4">
                         <div className="text-sm font-medium text-slate-900">
                           {user.nom} {user.prenom}
@@ -135,15 +127,7 @@ export default async function UsersPage({
           {users?.map((user) => (
             <div key={user.id} className="p-4">
               <div className="flex items-start gap-3">
-                {user.avatar_url ? (
-                  <img
-                    src={user.avatar_url}
-                    alt={`${user.nom} ${user.prenom}`}
-                    className="w-12 h-12 rounded-full object-cover flex-shrink-0"
-                  />
-                ) : (
-                  <UserCircle className="w-12 h-12 text-slate-400 flex-shrink-0" />
-                )}
+                <UserCircle className="w-12 h-12 text-slate-400 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">

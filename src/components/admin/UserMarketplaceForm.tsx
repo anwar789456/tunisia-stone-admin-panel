@@ -26,7 +26,6 @@ interface MarketplacePost {
   images: string[] | null
   category: string | null
   status: string
-  contact_info: string | null
 }
 
 interface UserMarketplaceFormProps {
@@ -50,7 +49,6 @@ export default function UserMarketplaceForm({ userId, post, onSuccess, onCancel 
     location: post?.location || '',
     category: post?.category || '',
     status: post?.status || 'active',
-    contact_info: post?.contact_info || '',
   })
 
   const [existingImages, setExistingImages] = useState<string[]>(post?.images || [])
@@ -148,7 +146,6 @@ export default function UserMarketplaceForm({ userId, post, onSuccess, onCancel 
         location: formData.location || null,
         category: formData.category || null,
         status: formData.status,
-        contact_info: formData.contact_info || null,
         images: allImages.length > 0 ? allImages : null,
       }
 
@@ -272,19 +269,6 @@ export default function UserMarketplaceForm({ userId, post, onSuccess, onCancel 
             <option value="inactive">Inactive</option>
           </select>
         </div>
-      </div>
-
-      <div>
-        <label className="block text-xs sm:text-sm font-medium text-slate-700 mb-2">
-          Informations de Contact
-        </label>
-        <input
-          type="text"
-          value={formData.contact_info}
-          onChange={(e) => setFormData({ ...formData, contact_info: e.target.value })}
-          className="w-full px-3 sm:px-4 py-2.5 sm:py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-slate-900 text-sm sm:text-base min-h-[44px]"
-          placeholder="Numéro de téléphone, email, etc."
-        />
       </div>
 
       {/* Images Section */}
