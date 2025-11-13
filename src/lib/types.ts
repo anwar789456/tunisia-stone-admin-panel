@@ -9,6 +9,8 @@ export interface Profile {
   slug: string | null
   is_pro: boolean | null
   is_admin?: boolean | null
+  created_at?: string | null
+  updated_at?: string | null
 }
 
 export interface MarketplacePost {
